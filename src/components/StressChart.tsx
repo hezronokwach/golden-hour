@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuraStore } from '@/store/useAuraStore';
+import { useElderLinkStore } from '@/store/useElderLinkStore';
 import {
     LineChart,
     Line,
@@ -16,25 +16,22 @@ import { motion } from 'framer-motion';
 import { useMemo, useEffect, useState } from 'react';
 
 export const StressChart = () => {
-    const sessionHistory = useAuraStore((state) => state.sessionHistory);
-    const stressScore = useAuraStore((state) => state.stressScore);
+    const sessionHistory = useElderLinkStore((state) => state.sessionHistory);
+    const emotionalScore = useElderLinkStore((state) => state.emotionalScore);
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    const chartColor = useMemo(() => {
-        if (stressScore < 30) return 'var(--calm)';
-        if (stressScore < 70) return 'var(--alert)';
-        return 'var(--stressed)';
-    }, [stressScore]);
+    const avgScore = useMemo(() => {
+        return Math.round((emotionalScore.loneliness + emotionalScore.confusion + emotionalScore.distress) / 3);
+    }, [emotionalScore]);
 
-    // If not mounted or no history, show placeholder
     if (!isMounted || sessionHistory.length === 0) {
         return (
-            <div className="h-64 flex items-center justify-center glass rounded-[2rem] border border-white/5">
-                <p className="text-sm opacity-30 italic">No session data available yet. Start talking to see your stress trends.</p>
+            <div className="h-64 flex items-center justify-center glass rounded-3xl border border-gray-200">
+                <p className="text-lg text-gray-400">No session data yet. Start talking to see emotional trends.</p>
             </div>
         );
     }
@@ -43,66 +40,76 @@ export const StressChart = () => {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full h-80 glass p-6 rounded-[2.5rem] border border-white/10 shadow-xl overflow-hidden"
+            className="w-full h-80 bg-white/60 backdrop-blur-sm p-6 rounded-3xl border border-gray-200 shadow-lg"
         >
-            <div className="flex items-center justify-between mb-6 px-2">
+            <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h3 className="text-lg font-bold tracking-tight">Stress Trends</h3>
-                    <p className="text-xs opacity-40 uppercase tracking-widest font-bold">Real-time Session Analysis</p>
+                    <h3 className="text-xl font-bold text-gray-700">Emotional Trends</h3>
+                    <p className="text-sm text-gray-500">Real-time Session Analysis</p>
                 </div>
-                <div className="flex gap-2">
-                    <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-calm" />
-                        <span className="text-[10px] opacity-40 font-bold uppercase">Calm</span>
+                <div className="flex gap-3">
+                    <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#5B9BD5' }} />
+                        <span className="text-sm text-gray-600">Loneliness</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-stressed" />
-                        <span className="text-[10px] opacity-40 font-bold uppercase">Stressed</span>
+                    <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#F4A460' }} />
+                        <span className="text-sm text-gray-600">Confusion</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#9B7EBD' }} />
+                        <span className="text-sm text-gray-600">Distress</span>
                     </div>
                 </div>
             </div>
 
-            <div className="h-56 w-full pr-4 relative">
+            <div className="h-56 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={sessionHistory}>
-                        <defs>
-                            <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={chartColor} stopOpacity={0.3} />
-                                <stop offset="95%" stopColor={chartColor} stopOpacity={0} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                    <LineChart data={sessionHistory}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.1)" />
                         <XAxis
                             dataKey="time"
                             axisLine={false}
                             tickLine={false}
-                            tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.3)' }}
+                            tick={{ fontSize: 12, fill: '#666' }}
                             minTickGap={30}
                         />
                         <YAxis
-                            hide
                             domain={[0, 100]}
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fontSize: 12, fill: '#666' }}
                         />
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '1rem',
-                                fontSize: '12px',
-                                color: '#fff'
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                border: '1px solid #ddd',
+                                borderRadius: '0.5rem',
+                                fontSize: '14px'
                             }}
-                            itemStyle={{ color: chartColor }}
                         />
-                        <Area
+                        <Line
                             type="monotone"
-                            dataKey="score"
-                            stroke={chartColor}
-                            strokeWidth={3}
-                            fillOpacity={1}
-                            fill="url(#colorScore)"
-                            animationDuration={1500}
+                            dataKey="loneliness"
+                            stroke="#5B9BD5"
+                            strokeWidth={2}
+                            dot={false}
                         />
-                    </AreaChart>
+                        <Line
+                            type="monotone"
+                            dataKey="confusion"
+                            stroke="#F4A460"
+                            strokeWidth={2}
+                            dot={false}
+                        />
+                        <Line
+                            type="monotone"
+                            dataKey="distress"
+                            stroke="#9B7EBD"
+                            strokeWidth={2}
+                            dot={false}
+                        />
+                    </LineChart>
                 </ResponsiveContainer>
             </div>
         </motion.div>
