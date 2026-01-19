@@ -71,11 +71,11 @@ export const useElderLinkStore = create<ElderLinkState>()(
 
                 setEmotionalScores: (loneliness, confusion, distress) => set((state) => ({
                     emotionalScore: { loneliness, confusion, distress },
-                    sessionHistory: [...state.sessionHistory, { 
-                        time: new Date().toLocaleTimeString(), 
-                        loneliness, 
-                        confusion, 
-                        distress 
+                    sessionHistory: [...state.sessionHistory, {
+                        time: new Date().toLocaleTimeString(),
+                        loneliness,
+                        confusion,
+                        distress
                     }].slice(-20)
                 })),
 
@@ -92,9 +92,9 @@ export const useElderLinkStore = create<ElderLinkState>()(
                     sessionHistory: [...state.sessionHistory, data].slice(-20),
                 })),
 
-                resetSession: () => set({ 
-                    emotionalScore: { loneliness: 0, confusion: 0, distress: 0 }, 
-                    sessionHistory: [] 
+                resetSession: () => set({
+                    emotionalScore: { loneliness: 0, confusion: 0, distress: 0 },
+                    sessionHistory: []
                 }),
             }),
             {
