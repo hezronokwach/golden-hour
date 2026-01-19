@@ -10,10 +10,25 @@ import { CalmGuidance } from '@/components/CalmGuidance';
 import { useFirebaseSync } from '@/hooks/useFirebase';
 import { useElderLinkStore } from '@/store/useElderLinkStore';
 import { AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   useFirebaseSync();
   const activeIntervention = useElderLinkStore((state) => state.activeIntervention);
+  const [currentTime, setCurrentTime] = useState('');
+
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(new Date().toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      }));
+    };
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 text-gray-800 flex flex-col">
@@ -29,7 +44,7 @@ export default function Home() {
             </div>
           </div>
           <div className="text-2xl text-gray-600">
-            {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+            {currentTime}
           </div>
         </div>
       </header>

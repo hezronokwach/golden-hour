@@ -251,8 +251,30 @@ export const useHume = () => {
                 }
                 else if (toolName === 'provide_orientation') {
                     const context = params.context_needed;
+                    const now = new Date();
+                    
+                    const timeStr = now.toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                    const dateStr = now.toLocaleDateString('en-US', { 
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
+                    });
+                    const hour = now.getHours();
+                    const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+                    
+                    const responseMessage = `The current time is ${timeStr} on ${dateStr}. It's ${timeOfDay}.`;
+                    console.log('Sending time to AI:', responseMessage);
+                    
                     useElderLinkStore.getState().triggerIntervention('calm_guidance', { context });
-                    result = { success: true, message: `Providing ${context} information` };
+                    result = { 
+                        success: true, 
+                        message: responseMessage
+                    };
                 }
                 else if (toolName === 'start_calm_activity') {
                     const activity = params.activity_type;
