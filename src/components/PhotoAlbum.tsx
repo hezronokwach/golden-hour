@@ -42,8 +42,17 @@ export const PhotoAlbum = () => {
                             transition={{ delay: index * 0.1 }}
                             className="bg-gray-100 rounded-2xl p-6 text-center"
                         >
-                            <div className="w-full aspect-square bg-gradient-to-br from-blue-200 to-purple-200 rounded-xl mb-4 flex items-center justify-center">
-                                <span className="text-6xl">{member.name[0]}</span>
+                            <div className="w-full aspect-square rounded-xl mb-4 overflow-hidden bg-gray-200">
+                                <img 
+                                    src={member.photo} 
+                                    alt={member.name}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.display = 'none';
+                                        target.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-blue-200 to-purple-200 flex items-center justify-center"><span class="text-6xl">${member.name[0]}</span></div>`;
+                                    }}
+                                />
                             </div>
                             <h3 className="text-3xl font-bold text-gray-800 mb-2">{member.name}</h3>
                             <p className="text-2xl text-gray-600">{member.relation}</p>
