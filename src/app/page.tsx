@@ -44,15 +44,20 @@ export default function Home() {
 
         <section className="flex-1 flex flex-col gap-8">
           <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-gray-200 min-h-[400px] flex items-center justify-center">
-            {activeIntervention.type === 'none' ? (
-              <div className="text-center">
-                <p className="text-3xl text-gray-500">Ready to help</p>
-              </div>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-2xl text-gray-600">
-                Intervention active
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {activeIntervention.type === 'none' ? (
+                <div className="text-center">
+                  <p className="text-3xl text-gray-500">Ready to help</p>
+                </div>
+              ) : (
+                <>
+                  {activeIntervention.type === 'photos' && <PhotoAlbum />}
+                  {activeIntervention.type === 'music' && <MusicPlayer />}
+                  {activeIntervention.type === 'family_alert' && <FamilyNotification />}
+                  {activeIntervention.type === 'calm_guidance' && <CalmGuidance />}
+                </>
+              )}
+            </AnimatePresence>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -61,13 +66,6 @@ export default function Home() {
           </div>
         </section>
       </div>
-
-      <AnimatePresence>
-        {activeIntervention.type === 'photos' && <PhotoAlbum />}
-        {activeIntervention.type === 'music' && <MusicPlayer />}
-        {activeIntervention.type === 'family_alert' && <FamilyNotification />}
-        {activeIntervention.type === 'calm_guidance' && <CalmGuidance />}
-      </AnimatePresence>
     </main>
   );
 }
