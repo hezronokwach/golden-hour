@@ -42,29 +42,29 @@ export const VoiceController = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-stressed/10 border border-stressed/20 px-4 py-2 rounded-full text-stressed text-xs flex items-center gap-2 shadow-lg backdrop-blur-md"
+                    className="bg-alert/10 border border-alert/20 px-4 py-2 rounded-full text-alert text-sm flex items-center gap-2 shadow-lg backdrop-blur-md"
                 >
                     <AlertTriangle className="w-4 h-4" />
                     {error}
                 </motion.div>
             )}
 
-            <div className="w-full flex items-center gap-3 bg-card/80 backdrop-blur-2xl border border-white/10 p-3 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.3)] ring-1 ring-white/5">
+            <div className="w-full flex items-center gap-3 bg-white/80 backdrop-blur-sm border border-gray-200 p-3 rounded-full shadow-lg">
                 {!isActive ? (
                     <button
                         onClick={() => startSession()}
                         disabled={isConnecting}
-                        className={`flex items-center justify-center gap-4 w-full py-5 rounded-full font-bold uppercase tracking-widest text-[11px] transition-all duration-500 shadow-2xl ${isConnecting
-                            ? 'bg-white/5 text-white/20'
+                        className={`flex items-center justify-center gap-4 w-full py-5 rounded-full font-bold uppercase tracking-widest text-sm transition-all duration-500 shadow-lg ${isConnecting
+                            ? 'bg-gray-200 text-gray-400'
                             : 'bg-calm text-white hover:bg-calm/90 hover:scale-[1.02] active:scale-[0.98]'
                             }`}
                     >
                         {isConnecting ? (
-                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin" />
                         ) : (
-                            <Play className="w-3 h-3 fill-current" />
+                            <Play className="w-4 h-4 fill-current" />
                         )}
-                        {isConnecting ? 'Waking up Aura' : 'Start Session'}
+                        {isConnecting ? 'Connecting' : 'Start Session'}
                     </button>
                 ) : (
                     <div className="flex items-center justify-between w-full px-2">
@@ -72,24 +72,24 @@ export const VoiceController = () => {
                             <button
                                 onClick={toggleMic}
                                 className={`p-4 rounded-full transition-all duration-300 shadow-lg ${isMicMuted
-                                    ? 'bg-stressed text-white hover:bg-stressed/90 hover:scale-110'
-                                    : 'bg-calm text-white hover:bg-calm/90 hover:scale-110 shadow-[0_0_20px_rgba(20,184,166,0.3)]'
+                                    ? 'bg-alert text-white hover:bg-alert/90 hover:scale-110'
+                                    : 'bg-calm text-white hover:bg-calm/90 hover:scale-110'
                                     }`}
                             >
                                 {isMicMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                             </button>
-                            <span className="text-[10px] font-black uppercase tracking-widest opacity-40">
+                            <span className="text-sm font-semibold text-gray-600">
                                 {isMicMuted ? 'Muted' : 'Listening'}
                             </span>
                         </div>
 
-                        <div className="w-px h-8 bg-white/10 mx-2" />
+                        <div className="w-px h-8 bg-gray-300 mx-2" />
 
                         <button
                             onClick={endSession}
-                            className="flex items-center gap-3 px-6 py-4 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 text-white/60 hover:text-white transition-all duration-300"
+                            className="flex items-center gap-3 px-6 py-4 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200 text-gray-600 hover:text-gray-800 transition-all duration-300"
                         >
-                            <span className="text-[10px] font-bold uppercase tracking-widest">End</span>
+                            <span className="text-sm font-semibold uppercase tracking-wider">End</span>
                             <PhoneOff className="w-4 h-4" />
                         </button>
                     </div>
@@ -100,9 +100,9 @@ export const VoiceController = () => {
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 0.4 }}
-                    className="text-[9px] uppercase tracking-[0.3em] font-black text-white pointer-events-none"
+                    className="text-xs uppercase tracking-wider font-semibold text-gray-500"
                 >
-                    Aura Presence Active
+                    ElderLink Active
                 </motion.div>
             )}
         </div>
