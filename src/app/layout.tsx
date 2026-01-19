@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GoldenHour | Empathic Productivity",
-  description: "Your voice-first, empathic productivity assistant designed to help you focus and manage burnout.",
+  title: "ElderLink | Compassionate AI Companion",
+  description: "Voice-first AI companion for elderly care, providing emotional support and proactive interventions.",
   icons: {
     icon: "/logo.png",
   },
