@@ -18,10 +18,23 @@ export const MusicPlayer = () => {
 
     useEffect(() => {
         if (audioRef.current) {
-            audioRef.current.play();
-            setIsPlaying(true);
+            console.log('Loading audio:', currentSong.url);
+            audioRef.current.load();
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        console.log('Audio playing successfully');
+                        setIsPlaying(true);
+                    })
+                    .catch(err => {
+                        console.warn('Audio autoplay blocked or failed:', err);
+                        console.log('Click the play button to start music');
+                        setIsPlaying(false);
+                    });
+            }
         }
-    }, []);
+    }, [currentSong.url]);
 
     const togglePlay = () => {
         if (audioRef.current) {
@@ -37,13 +50,19 @@ export const MusicPlayer = () => {
     const playNext = () => {
         const nextIndex = (currentIndex + 1) % userProfile.favoriteSongs.length;
         setCurrentIndex(nextIndex);
-        setIsPlaying(true);
+        if (audioRef.current) {
+            audioRef.current.load();
+            audioRef.current.play().catch(err => console.warn('Play failed:', err));
+        }
     };
 
     const playPrevious = () => {
         const prevIndex = currentIndex === 0 ? userProfile.favoriteSongs.length - 1 : currentIndex - 1;
         setCurrentIndex(prevIndex);
-        setIsPlaying(true);
+        if (audioRef.current) {
+            audioRef.current.load();
+            audioRef.current.play().catch(err => console.warn('Play failed:', err));
+        }
     };
 
     return (
@@ -96,8 +115,20 @@ export const MusicPlayer = () => {
                     ref={audioRef}
                     src={currentSong.url}
                     onEnded={playNext}
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
+                    onPlay={() => {
+                        console.log('Audio started playing');
+                        setIsPlaying(true);
+                    }}
+                    onPause={() => {
+                        console.log('Audio paused');
+                        setIsPlaying(false);
+                    }}
+                    onError={(e) => {
+                        console.error('Audio error:', e);
+                        console.error('Failed to load:', currentSong.url);
+                        console.log('Supported formats: MP3, WAV, OGG, M4A');
+                    }}
+                    onLoadedData={() => console.log('Audio loaded successfully')}
                 />
             </div>
         </motion.div>
