@@ -213,15 +213,52 @@ export const useHume = () => {
                 const toolCallId = msg.toolCallId || msg.tool_call_id;
                 const toolParams = msg.parameters;
 
-                console.warn('!!! HUME TOOL CALL RECEIVED !!!', toolName, toolParams);
+                console.warn('[ELDERLINK TOOL]', toolName, toolParams);
 
-                // ElderLink tools will be handled in Issue #3
-                // Placeholder for now
+                let params: any = {};
+                try {
+                    params = typeof toolParams === 'string' ? JSON.parse(toolParams) : toolParams;
+                } catch (e) {
+                    console.error('Failed to parse tool parameters', e);
+                }
+
+                let result = { success: false, message: '' };
+
+                if (toolName === 'show_photo_album') {
+                    const familyMember = params.family_member || 'all';
+                    useElderLinkStore.getState().triggerIntervention('photos', { familyMember });
+                    result = { success: true, message: `Showing photos of ${familyMember}` };
+                }
+                else if (toolName === 'play_music') {
+                    const preference = params.song_preference || 'favorite';
+                    useElderLinkStore.getState().triggerIntervention('music', { preference });
+                    result = { success: true, message: `Playing ${preference} music` };
+                }
+                else if (toolName === 'notify_family') {
+                    const { family_member, urgency, message } = params;
+                    useElderLinkStore.getState().triggerIntervention('family_alert', {
+                        familyMember: family_member,
+                        urgency,
+                        message
+                    });
+                    result = { success: true, message: `Notified ${family_member}` };
+                }
+                else if (toolName === 'provide_orientation') {
+                    const context = params.context_needed;
+                    useElderLinkStore.getState().triggerIntervention('calm_guidance', { context });
+                    result = { success: true, message: `Providing ${context} information` };
+                }
+                else if (toolName === 'start_calm_activity') {
+                    const activity = params.activity_type;
+                    useElderLinkStore.getState().triggerIntervention('calm_activity', { activity });
+                    result = { success: true, message: `Starting ${activity} activity` };
+                }
+
                 if (socketRef.current?.sendToolResponseMessage) {
                     socketRef.current.sendToolResponseMessage({
                         type: 'tool_response',
                         toolCallId: toolCallId,
-                        content: 'Tool received'
+                        content: result.message
                     });
                 }
                 break;
