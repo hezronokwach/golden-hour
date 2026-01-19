@@ -29,51 +29,55 @@ export const FamilyNotification = () => {
 
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="w-full h-full flex items-center justify-center"
         >
             <motion.div
                 animate={{ scale: [1, 1.02, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className={`bg-gradient-to-br ${urgencyColors[urgency as keyof typeof urgencyColors]} rounded-3xl p-12 max-w-xl w-full text-center shadow-2xl`}
+                className={`bg-gradient-to-br ${urgencyColors[urgency as keyof typeof urgencyColors]} rounded-2xl p-8 w-full max-w-md text-center`}
             >
                 <motion.div
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
-                    className="w-40 h-40 mx-auto bg-gradient-to-br from-blue-300 to-purple-300 rounded-full mb-8 flex items-center justify-center"
+                    className="w-32 h-32 mx-auto bg-gradient-to-br from-blue-300 to-purple-300 rounded-full mb-6 flex items-center justify-center overflow-hidden"
                 >
-                    <span className="text-7xl">{familyMember?.name[0] || '👤'}</span>
+                    {familyMember?.photo ? (
+                        <img src={familyMember.photo} alt={familyMember.name} className="w-full h-full object-cover" />
+                    ) : (
+                        <span className="text-6xl">{familyMember?.name[0] || '👤'}</span>
+                    )}
                 </motion.div>
 
-                <h2 className="text-4xl font-bold text-gray-800 mb-4">
+                <h2 className="text-3xl font-bold text-gray-800 mb-3">
                     Contacting {familyMemberName}...
                 </h2>
 
                 {message && (
-                    <p className="text-2xl text-gray-700 mb-6">{message}</p>
+                    <p className="text-xl text-gray-700 mb-4">{message}</p>
                 )}
 
-                <div className="flex items-center justify-center gap-2 mb-4">
+                <div className="flex items-center justify-center gap-2 mb-3">
                     <motion.div
                         animate={{ opacity: [0.3, 1, 0.3] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
-                        className="w-3 h-3 bg-blue-500 rounded-full"
+                        className="w-2 h-2 bg-blue-500 rounded-full"
                     />
                     <motion.div
                         animate={{ opacity: [0.3, 1, 0.3] }}
                         transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
-                        className="w-3 h-3 bg-blue-500 rounded-full"
+                        className="w-2 h-2 bg-blue-500 rounded-full"
                     />
                     <motion.div
                         animate={{ opacity: [0.3, 1, 0.3] }}
                         transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
-                        className="w-3 h-3 bg-blue-500 rounded-full"
+                        className="w-2 h-2 bg-blue-500 rounded-full"
                     />
                 </div>
 
-                <p className="text-xl text-gray-600">
+                <p className="text-lg text-gray-600">
                     {familyMember?.relation} will be notified
                 </p>
             </motion.div>

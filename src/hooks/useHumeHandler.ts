@@ -231,6 +231,12 @@ export const useHume = () => {
                 }
                 else if (toolName === 'play_music') {
                     const preference = params.song_preference || 'favorite';
+                    // Mute AI speaker when music starts
+                    if (playerRef.current) {
+                        playerRef.current.stop();
+                    }
+                    isSpeakerMutedRef.current = true;
+                    setIsSpeakerMuted(true);
                     useElderLinkStore.getState().triggerIntervention('music', { preference });
                     result = { success: true, message: `Playing ${preference} music` };
                 }

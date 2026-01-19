@@ -18,18 +18,13 @@ export const MusicPlayer = () => {
 
     useEffect(() => {
         if (audioRef.current) {
-            console.log('Loading audio:', currentSong.url);
             audioRef.current.load();
             const playPromise = audioRef.current.play();
             if (playPromise !== undefined) {
                 playPromise
-                    .then(() => {
-                        console.log('Audio playing successfully');
-                        setIsPlaying(true);
-                    })
+                    .then(() => setIsPlaying(true))
                     .catch(err => {
-                        console.warn('Audio autoplay blocked or failed:', err);
-                        console.log('Click the play button to start music');
+                        console.warn('Audio autoplay blocked:', err);
                         setIsPlaying(false);
                     });
             }
@@ -67,47 +62,47 @@ export const MusicPlayer = () => {
 
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="w-full h-full flex items-center justify-center"
         >
-            <div className="bg-gradient-to-br from-purple-100 to-blue-100 rounded-3xl p-12 max-w-2xl w-full relative">
+            <div className="bg-gradient-to-br from-purple-100 to-blue-100 rounded-2xl p-8 w-full max-w-md relative">
                 <button
                     onClick={clearIntervention}
-                    className="absolute top-6 right-6 w-14 h-14 rounded-full bg-white/80 hover:bg-white flex items-center justify-center transition-colors"
+                    className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 hover:bg-white flex items-center justify-center transition-colors"
                 >
-                    <X size={32} />
+                    <X size={24} />
                 </button>
 
-                <div className="text-center mb-12">
-                    <div className="w-48 h-48 mx-auto bg-gradient-to-br from-purple-300 to-blue-300 rounded-full mb-8 flex items-center justify-center">
-                        <span className="text-8xl">🎵</span>
+                <div className="text-center mb-8">
+                    <div className="w-32 h-32 mx-auto bg-gradient-to-br from-purple-300 to-blue-300 rounded-full mb-6 flex items-center justify-center">
+                        <span className="text-6xl">🎵</span>
                     </div>
-                    <h2 className="text-4xl font-bold text-gray-800 mb-3">{currentSong.title}</h2>
-                    <p className="text-3xl text-gray-600">{currentSong.artist}</p>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-2">{currentSong.title}</h2>
+                    <p className="text-2xl text-gray-600">{currentSong.artist}</p>
                 </div>
 
-                <div className="flex items-center justify-center gap-6">
+                <div className="flex items-center justify-center gap-4">
                     <button
                         onClick={playPrevious}
-                        className="w-20 h-20 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-colors shadow-lg"
+                        className="w-16 h-16 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-colors shadow-lg"
                     >
-                        <SkipBack size={40} />
+                        <SkipBack size={28} />
                     </button>
 
                     <button
                         onClick={togglePlay}
-                        className="w-28 h-28 rounded-full bg-blue-500 hover:bg-blue-600 flex items-center justify-center transition-colors shadow-xl"
+                        className="w-20 h-20 rounded-full bg-blue-500 hover:bg-blue-600 flex items-center justify-center transition-colors shadow-xl"
                     >
-                        {isPlaying ? <Pause size={56} className="text-white" /> : <Play size={56} className="text-white ml-2" />}
+                        {isPlaying ? <Pause size={40} className="text-white" /> : <Play size={40} className="text-white ml-1" />}
                     </button>
 
                     <button
                         onClick={playNext}
-                        className="w-20 h-20 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-colors shadow-lg"
+                        className="w-16 h-16 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center transition-colors shadow-lg"
                     >
-                        <SkipForward size={40} />
+                        <SkipForward size={28} />
                     </button>
                 </div>
 
@@ -115,20 +110,8 @@ export const MusicPlayer = () => {
                     ref={audioRef}
                     src={currentSong.url}
                     onEnded={playNext}
-                    onPlay={() => {
-                        console.log('Audio started playing');
-                        setIsPlaying(true);
-                    }}
-                    onPause={() => {
-                        console.log('Audio paused');
-                        setIsPlaying(false);
-                    }}
-                    onError={(e) => {
-                        console.error('Audio error:', e);
-                        console.error('Failed to load:', currentSong.url);
-                        console.log('Supported formats: MP3, WAV, OGG, M4A');
-                    }}
-                    onLoadedData={() => console.log('Audio loaded successfully')}
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
                 />
             </div>
         </motion.div>
