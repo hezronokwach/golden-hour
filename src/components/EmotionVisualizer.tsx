@@ -16,13 +16,13 @@ export const EmotionVisualizer = ({ emotions }: EmotionVisualizerProps) => {
     if (topEmotions.length === 0) return null;
 
     return (
-        <div className="flex flex-col gap-3 p-6 glass rounded-[3rem] border border-white/10 w-full shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] backdrop-blur-3xl ring-1 ring-white/10">
+        <div className="flex flex-col gap-3 p-6 bg-white/60 backdrop-blur-sm rounded-3xl border border-gray-200 w-full shadow-lg">
             <div className="flex justify-between items-center mb-1 px-1">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Emotional Resonance</span>
+                <span className="text-xs font-semibold text-gray-700">Emotional Resonance</span>
                 <div className="flex gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-calm shadow-[0_0_10px_var(--calm)] animate-pulse" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-alert shadow-[0_0_10px_var(--alert)] animate-pulse delay-75" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-stressed shadow-[0_0_10px_var(--stressed)] animate-pulse delay-150" />
+                    <div className="w-2 h-2 rounded-full bg-calm shadow-sm" />
+                    <div className="w-2 h-2 rounded-full bg-concern shadow-sm" />
+                    <div className="w-2 h-2 rounded-full bg-alert shadow-sm" />
                 </div>
             </div>
 
@@ -31,8 +31,8 @@ export const EmotionVisualizer = ({ emotions }: EmotionVisualizerProps) => {
                     const isStress = ['Anxiety', 'Distress', 'Confusion', 'Fear', 'Sorrow'].includes(emotion);
                     const isCalm = ['Calmness', 'Contentment', 'Relief', 'Satisfaction'].includes(emotion);
 
-                    const colorClass = isStress ? 'bg-stressed' : isCalm ? 'bg-calm' : 'bg-alert';
-                    const glowClass = isStress ? 'shadow-[0_0_15px_rgba(225,29,72,0.4)]' : isCalm ? 'shadow-[0_0_15px_rgba(20,184,166,0.4)]' : 'shadow-[0_0_15px_rgba(245,158,11,0.4)]';
+                    const colorClass = isStress ? 'bg-alert' : isCalm ? 'bg-calm' : 'bg-concern';
+                    const glowClass = isStress ? 'shadow-[0_0_15px_rgba(155,126,189,0.4)]' : isCalm ? 'shadow-[0_0_15px_rgba(91,155,213,0.4)]' : 'shadow-[0_0_15px_rgba(244,164,96,0.4)]';
 
                     return (
                         <motion.div
@@ -45,10 +45,10 @@ export const EmotionVisualizer = ({ emotions }: EmotionVisualizerProps) => {
                             className="space-y-1.5"
                         >
                             <div className="flex justify-between items-end px-1">
-                                <span className="text-xs font-bold text-white/80 capitalize tracking-tight">{emotion}</span>
-                                <span className="text-[10px] font-mono font-bold opacity-30 italic">{(score * 100).toFixed(0)}%</span>
+                                <span className="text-sm font-semibold text-gray-700 capitalize">{emotion}</span>
+                                <span className="text-xs text-gray-500">{(score * 100).toFixed(0)}%</span>
                             </div>
-                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${score * 100}%` }}
