@@ -3,11 +3,12 @@
 :root {
   --background: #fdfcfb;
   --foreground: #1c1c1c;
-  --calm: #14b8a6; /* Teal 500 */
-  --alert: #f59e0b; /* Amber 500 */
-  --stressed: #e11d48; /* Rose 600 */
+  --calm: #5B9BD5; /* Soft Blue */
+  --concern: #F4A460; /* Warm Orange */
+  --alert: #9B7EBD; /* Gentle Purple */
   --card: #ffffff;
   --border: #e2e8f0;
+  font-size: 24px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,8 +24,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-calm: var(--calm);
+  --color-concern: var(--concern);
   --color-alert: var(--alert);
-  --color-stressed: var(--stressed);
   --color-card: var(--card);
   --color-border: var(--border);
 }
