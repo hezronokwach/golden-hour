@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { HumeClient } from 'hume';
-import { useAuraStore, type Task } from '@/store/useAuraStore';
+import { useElderLinkStore } from '@/store/useElderLinkStore';
 
 import {
     convertBlobToBase64,
@@ -20,7 +20,7 @@ export interface HumeMessage {
 }
 
 export const useHume = () => {
-    const { setStressScore, setVoiceState, tasks } = useAuraStore();
+    const { setEmotionalScores, setVoiceState } = useElderLinkStore();
     const [status, setStatus] = useState<HumeStatus>('IDLE');
     const [messages, setMessages] = useState<HumeMessage[]>([]);
     const [liveTranscript, setLiveTranscript] = useState<string>('');
@@ -33,7 +33,6 @@ export const useHume = () => {
     const socketRef = useRef<any>(null);
     const recorderRef = useRef<MediaRecorder | null>(null);
     const playerRef = useRef<EVIWebAudioPlayer | null>(null);
-    const lastSyncedTasksRef = useRef<string>('');
 
     useEffect(() => {
         return () => {
@@ -49,60 +48,54 @@ export const useHume = () => {
         };
     }, []);
 
-    const calculateStress = (prosody: any) => {
-        if (!prosody?.scores) return 0;
+    const calculateEmotionalState = (prosody: any) => {
+        if (!prosody?.scores) return { loneliness: 0, confusion: 0, distress: 0 };
 
-        // Weights for different "stressful" emotions
-        const weights: Record<string, number> = {
-            'anxiety': 2.5,
-            'distress': 3.0,
-            'fear': 2.0,
-            'tiredness': 1.2,
-            'anger': 2.5,
-            'frustration': 2.8,
-            'sorrow': 1.0,
-            'disappointment': 1.2,
-            'confusion': 0.8,
-            'disgust': 0.6,
-            'pain': 1.5,
-            'calmness': -1.2,
-            'contentment': -1.0,
-            'relief': -1.8
+        const lonelinessWeights: Record<string, number> = {
+            'sadness': 2.5,
+            'loneliness': 3.0,
+            'sorrow': 2.0,
+            'disappointment': 1.5,
+            'boredom': 1.8,
+            'contentment': -1.5,
+            'joy': -2.0
         };
 
-        let stressSum = 0;
-        let calmSum = 0;
-        console.group('Stress Calculation Analysis');
+        const confusionWeights: Record<string, number> = {
+            'confusion': 3.0,
+            'uncertainty': 2.5,
+            'anxiety': 2.0,
+            'fear': 1.8,
+            'surprise': 1.2,
+            'calmness': -1.5
+        };
 
-        Object.entries(prosody.scores).forEach(([emotion, score]: [string, any]) => {
-            const eLower = emotion.toLowerCase();
-            const weight = weights[eLower] || 0;
-            if (weight !== 0) {
-                const contribution = score * weight;
-                if (weight > 0) {
-                    stressSum += contribution;
-                } else {
-                    calmSum += contribution;
-                }
+        const distressWeights: Record<string, number> = {
+            'distress': 3.0,
+            'anxiety': 2.5,
+            'fear': 2.5,
+            'pain': 2.8,
+            'anger': 2.0,
+            'relief': -2.0,
+            'calmness': -1.8
+        };
 
-                if (Math.abs(contribution) > 0.005) {
-                    console.log(`- ${emotion}: score=${score.toFixed(3)}, weight=${weight}, contrib=${contribution.toFixed(3)}`);
-                }
-            }
-        });
+        const calculateScore = (weights: Record<string, number>) => {
+            let sum = 0;
+            Object.entries(prosody.scores).forEach(([emotion, score]: [string, any]) => {
+                const weight = weights[emotion.toLowerCase()] || 0;
+                sum += score * weight;
+            });
+            return Math.max(0, Math.min(100, Math.round(sum * 300)));
+        };
 
-        // Intervention: If any stress is detected, damp the calming effect significantly
-        const effectiveCalm = stressSum > 0.05 ? calmSum * 0.2 : calmSum;
-        const rawScore = stressSum + effectiveCalm;
+        const loneliness = calculateScore(lonelinessWeights);
+        const confusion = calculateScore(confusionWeights);
+        const distress = calculateScore(distressWeights);
 
-        // Normalize and scale to 0-100
-        const finalScore = Math.max(0, Math.min(100, Math.round(rawScore * 300))); // Boosted sensitivity
+        console.log(`Emotional State - Loneliness: ${loneliness}, Confusion: ${confusion}, Distress: ${distress}`);
 
-        console.log(`Stress Sum: ${stressSum.toFixed(4)}, Calm Sum: ${calmSum.toFixed(4)} (Effective: ${effectiveCalm.toFixed(4)})`);
-        console.log(`Final Scaled Stress Score: ${finalScore}`);
-        console.groupEnd();
-
-        return finalScore;
+        return { loneliness, confusion, distress };
     };
 
     const startAudioCapture = useCallback(async (socket: any) => {
@@ -181,11 +174,11 @@ export const useHume = () => {
                             timestamp: Date.now()
                         }]);
 
-                        // Calculate Stress from User Message
+                        // Calculate Emotional State from User Message
                         if (msg.models?.prosody) {
-                            const score = calculateStress(msg.models.prosody);
-                            console.log('Calculated stress score:', score, 'from prosody:', msg.models.prosody);
-                            setStressScore(score);
+                            const scores = calculateEmotionalState(msg.models.prosody);
+                            console.log('Calculated emotional scores:', scores);
+                            setEmotionalScores(scores.loneliness, scores.confusion, scores.distress);
                             setEmotions(msg.models.prosody.scores || {});
                         }
                     }
@@ -222,47 +215,14 @@ export const useHume = () => {
 
                 console.warn('!!! HUME TOOL CALL RECEIVED !!!', toolName, toolParams);
 
-                if (toolName === 'manage_burnout' && toolCallId) {
-                    let params: any = {};
-                    try {
-                        params = typeof toolParams === 'string'
-                            ? JSON.parse(toolParams)
-                            : toolParams;
-                    } catch (e) {
-                        console.error('Failed to parse tool parameters', e);
-                    }
-
-                    const taskId = params.task_id || params.taskId;
-                    // Resiliency: AI sometimes hallucination 'new_status' or 'status'
-                    let adjustmentType = params.adjustment_type || params.adjustmentType || params.new_status || params.status || 'postpone';
-
-                    // Normalize common AI variations to strict internal actions
-                    const isComplete = ['complete', 'completed', 'finished', 'done', 'finish'].includes(adjustmentType.toLowerCase());
-                    const isPostpone = ['postpone', 'postponed', 'later', 'move'].includes(adjustmentType.toLowerCase());
-                    const isCancel = ['cancel', 'cancelled', 'drop', 'remove'].includes(adjustmentType.toLowerCase());
-
-                    if (isComplete) adjustmentType = 'complete';
-                    else if (isPostpone) adjustmentType = 'postpone';
-                    else if (isCancel) adjustmentType = 'cancel';
-
-                    console.warn(`[AURA TOOL] EXECUTING: task=${taskId}, action=${adjustmentType}`);
-
-                    const result = useAuraStore.getState().manageBurnout(taskId, adjustmentType);
-                    console.warn(`[AURA TOOL] RESULT:`, result.message);
-
-                    if (socketRef.current?.sendToolResponseMessage) {
-                        socketRef.current.sendToolResponseMessage({
-                            type: 'tool_response',
-                            toolCallId: toolCallId,
-                            content: result.message
-                        });
-                    } else if (socketRef.current?.sendToolResponse) {
-                        socketRef.current.sendToolResponse({
-                            type: 'tool_response',
-                            tool_call_id: toolCallId,
-                            content: result.message
-                        });
-                    }
+                // ElderLink tools will be handled in Issue #3
+                // Placeholder for now
+                if (socketRef.current?.sendToolResponseMessage) {
+                    socketRef.current.sendToolResponseMessage({
+                        type: 'tool_response',
+                        toolCallId: toolCallId,
+                        content: 'Tool received'
+                    });
                 }
                 break;
 
@@ -275,39 +235,7 @@ export const useHume = () => {
                 console.log('DEBUG: Received message of type:', msg.type, msg);
                 break;
         }
-    }, [setStressScore, setVoiceState]);
-
-    // Update Hume context whenever tasks change
-    useEffect(() => {
-        if (socketRef.current && status === 'ACTIVE') {
-            const taskContext = tasks.map((t: Task) =>
-                `- [${t.id}] ${t.title} (${t.priority} priority, status: ${t.status}, due: ${t.day})`
-            ).join('\n');
-
-            // ONLY sync if the task state has actually changed to avoid socket spam/closure
-            if (taskContext === lastSyncedTasksRef.current) return;
-            lastSyncedTasksRef.current = taskContext;
-
-            const baseInstructions = `
-You are Aura, an empathic productivity assistant.
-CORE RULES:
-1. You MUST use 'manage_burnout' for ANY status change. Never just talk about it—do it!
-2. ACTION MAPPING:
-   - User says "Finished", "Done", "Fixed", or "Checked off" -> Use 'complete'.
-   - User says "Later", "Tomorrow", or "Can't do it now" -> Use 'postpone'.
-3. MANDATORY: The tool 'manage_burnout' is your ONLY way to change tasks. Even if the user sounds happy, use it to mark things as 'complete'.
-4. Celebrate! When a user finishes a task, call the tool first, then tell them how proud you are.
-5. Refer to tasks by their IDs (e.g., "Task 1").
-`;
-
-            const fullPrompt = `${baseInstructions}\n\nCURRENT TASKS:\n${taskContext}`;
-
-            console.warn('--- AURA: Syncing Tasks to Hume ---');
-            socketRef.current.sendSessionSettings({
-                system_prompt: fullPrompt
-            });
-        }
-    }, [tasks, status]);
+    }, [setEmotionalScores, setVoiceState]);
 
     const handleError = useCallback((err: Event | Error) => {
         console.error('Hume socket error:', err);
